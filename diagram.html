@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL OSINT — Architecture Diagram</title>
+<style>
+  :root {
+    --bg:       #070710;
+    --surface:  #0d0d1a;
+    --card:     #111122;
+    --border:   #1a1a33;
+    --accent:   #00ff9f;
+    --blue:     #00aaff;
+    --purple:   #aa00ff;
+    --orange:   #ff9f00;
+    --pink:     #ff00aa;
+    --red:      #ff3333;
+    --yellow:   #ffff00;
+    --cyan:     #00ffff;
+    --text:     #e0e0e0;
+    --muted:    #555577;
+    --dim:      #333355;
+    --glow-g:   0 0 20px #00ff9f44;
+    --glow-b:   0 0 20px #00aaff44;
+    --glow-p:   0 0 20px #aa00ff44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', 'SF Mono', monospace;
+    min-height: 100vh;
+    padding: 32px 24px 48px;
+  }
+
+  /* ─── Header ─────────────────────────────────────── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .ascii-title {
+    font-size: clamp(7px, 1.1vw, 13px);
+    color: var(--accent);
+    line-height: 1.3;
+    letter-spacing: 1px;
+    text-shadow: var(--glow-g);
+    white-space: pre;
+    display: inline-block;
+  }
+
+  .tagline {
+    color: var(--blue);
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    opacity: .8;
+  }
+
+  .version-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #00ff9f22, #00aaff11);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 11px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+    letter-spacing: 2px;
+  }
+
+  /* ─── Stats Row ───────────────────────────────────── */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 44px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 40px;
+    text-align: center;
+    transition: border-color .3s;
+  }
+
+  .stat-pill:hover { border-color: var(--accent); box-shadow: var(--glow-g); }
+
+  .stat-num { font-size: 22px; font-weight: 700; }
+  .stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* ─── Section Labels ──────────────────────────────── */
+  .section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* ─── Grid Layout ────────────────────────────────── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ─── Cards ──────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    transition: border-color .3s, box-shadow .3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--stripe, var(--accent));
+    opacity: .6;
+  }
+
+  .card:hover { border-color: var(--hover-border, var(--accent)); box-shadow: var(--hover-glow, var(--glow-g)); }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ─── Entry Points ───────────────────────────────── */
+  .entry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .entry-item {
+    background: var(--surface);
+    border: 1px solid var(--dim);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all .2s;
+  }
+
+  .entry-item:hover {
+    border-color: var(--accent);
+    background: #00ff9f08;
+    transform: translateY(-2px);
+  }
+
+  .entry-icon { font-size: 22px; flex-shrink: 0; }
+  .entry-name { font-size: 13px; font-weight: 700; }
+  .entry-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* ─── Module Grid ────────────────────────────────── */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+  }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--dim);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    transition: all .25s;
+    cursor: default;
+  }
+
+  .module-card:hover {
+    border-color: var(--m-color, var(--accent));
+    box-shadow: 0 0 16px color-mix(in srgb, var(--m-color, var(--accent)) 30%, transparent);
+    transform: translateY(-3px);
+  }
+
+  .module-icon { font-size: 28px; margin-bottom: 8px; }
+  .module-name { font-size: 12px; font-weight: 700; letter-spacing: .5px; margin-bottom: 4px; }
+  .module-count {
+    display: inline-block;
+    background: color-mix(in srgb, var(--m-color, var(--accent)) 20%, transparent);
+    color: var(--m-color, var(--accent));
+    border: 1px solid color-mix(in srgb, var(--m-color, var(--accent)) 50%, transparent);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .module-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-top: 8px; }
+  .module-tag {
+    font-size: 9px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--dim);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ─── Data Flow ──────────────────────────────────── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px 0;
+  }
+
+  .flow-node {
+    background: var(--surface);
+    border: 1px solid var(--dim);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    white-space: nowrap;
+    transition: all .2s;
+  }
+
+  .flow-node:hover { border-color: var(--accent); }
+  .flow-node.accent { border-color: var(--accent); color: var(--accent); }
+  .flow-node.blue   { border-color: var(--blue);   color: var(--blue); }
+  .flow-node.purple { border-color: var(--purple);  color: var(--purple); }
+  .flow-arrow { color: var(--muted); font-size: 14px; }
+
+  /* ─── Tech Stack ─────────────────────────────────── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .tech-item {
+    background: var(--surface);
+    border: 1px solid var(--dim);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    transition: all .2s;
+  }
+
+  .tech-item:hover { border-color: var(--blue); background: #00aaff08; }
+  .tech-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── Data Sources Grid ─────────────────────────── */
+  .sources-container { display: flex; flex-direction: column; gap: 16px; }
+  .sources-category { }
+  .sources-category-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    padding-left: 4px;
+    border-left: 2px solid var(--dim);
+  }
+  .sources-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--dim);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--text);
+    transition: all .2s;
+  }
+  .pill:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ─── Output / Export ────────────────────────────── */
+  .output-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .output-item {
+    background: var(--surface);
+    border: 1px solid var(--dim);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    transition: all .2s;
+  }
+
+  .output-item:hover { border-color: var(--orange); background: #ff9f0008; }
+  .output-fmt { font-size: 22px; margin-bottom: 4px; }
+  .output-name { font-size: 12px; font-weight: 700; color: var(--orange); }
+  .output-desc { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  /* ─── Footer ─────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .footer .accent { color: var(--accent); }
+
+  /* ─── Connector Lines ────────────────────────────── */
+  .connector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 0;
+    gap: 6px;
+    color: var(--dim);
+    font-size: 20px;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 24px;
+    background: linear-gradient(to bottom, var(--accent), var(--blue));
+    margin: 0 auto;
+    opacity: .4;
+    border-radius: 2px;
+  }
+
+  /* responsive */
+  @media (min-width: 900px) {
+    .arch-grid { grid-template-columns: 1fr; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<div class="header">
+  <div class="ascii-title">
+  ███████╗███████╗███╗   ██╗████████╗██╗███╗   ██╗███████╗██╗
+  ██╔════╝██╔════╝████╗  ██║╚══██╔══╝██║████╗  ██║██╔════╝██║
+  ███████╗█████╗  ██╔██╗ ██║   ██║   ██║██╔██╗ ██║█████╗  ██║
+  ╚════██║██╔══╝  ██║╚██╗██║   ██║   ██║██║╚██╗██║██╔══╝  ██║
+  ███████║███████╗██║ ╚████║   ██║   ██║██║ ╚████║███████╗███████╗
+  ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝</div>
+  <div class="tagline">Open-Source Intelligence Framework</div>
+  <div class="version-badge">⚡ v2.0.0 · Python · Async · Termux Ready</div>
+</div>
+
+<!-- ═══════════════════════ STATS ═══════════════════════ -->
+<div class="stats-row">
+  <div class="stat-pill"><div class="stat-num" style="color:#00ff9f">120+</div><div class="stat-lbl">Email Sites</div></div>
+  <div class="stat-pill"><div class="stat-num" style="color:#00aaff">100+</div><div class="stat-lbl">Username Sites</div></div>
+  <div class="stat-pill"><div class="stat-num" style="color:#aa00ff">6</div><div class="stat-lbl">OSINT Modules</div></div>
+  <div class="stat-pill"><div class="stat-num" style="color:#ff9f00">3</div><div class="stat-lbl">Export Formats</div></div>
+  <div class="stat-pill"><div class="stat-num" style="color:#ff00aa">3</div><div class="stat-lbl">Interfaces</div></div>
+  <div class="stat-pill"><div class="stat-num" style="color:#00ffff">Async</div><div class="stat-lbl">Engine</div></div>
+</div>
+
+<div class="arch-grid">
+
+  <!-- ═══ ENTRY POINTS ═══ -->
+  <div class="card" style="--stripe:#00ff9f; --hover-border:#00ff9f; --hover-glow: 0 0 24px #00ff9f22;">
+    <div class="card-title" style="color:#00ff9f">⚡ ENTRY POINTS &amp; INTERFACES</div>
+    <div class="entry-grid">
+      <div class="entry-item">
+        <div class="entry-icon">💻</div>
+        <div>
+          <div class="entry-name" style="color:#00ff9f">CLI Interactive</div>
+          <div class="entry-desc">Rich menus · questionary · arrow keys</div>
+          <div class="entry-desc" style="color:#00ff9f;margin-top:3px">python sentinel.py</div>
+        </div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-icon">🌐</div>
+        <div>
+          <div class="entry-name" style="color:#00aaff">Web Dashboard</div>
+          <div class="entry-desc">Flask · REST API · localhost:5000</div>
+          <div class="entry-desc" style="color:#00aaff;margin-top:3px">python sentinel.py web</div>
+        </div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-icon">🤖</div>
+        <div>
+          <div class="entry-name" style="color:#aa00ff">Telegram Bot</div>
+          <div class="entry-desc">python-telegram-bot · async polling</div>
+          <div class="entry-desc" style="color:#aa00ff;margin-top:3px">python sentinel.py bot</div>
+        </div>
+      </div>
+      <div class="entry-item">
+        <div class="entry-icon">⚙️</div>
+        <div>
+          <div class="entry-name" style="color:#ff9f00">CLI Direct Mode</div>
+          <div class="entry-desc">Non-interactive · pipe-friendly</div>
+          <div class="entry-desc" style="color:#ff9f00;margin-top:3px">--email --username --ip</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONNECTOR ═══ -->
+  <div class="connector-line"></div>
+
+  <!-- ═══ CORE ENGINE ═══ -->
+  <div class="card" style="--stripe:#00aaff; --hover-border:#00aaff; --hover-glow: 0 0 24px #00aaff22;">
+    <div class="card-title" style="color:#00aaff">🧠 CORE ENGINE</div>
+    <div class="three-col">
+      <div>
+        <div class="section-label">config manager</div>
+        <div class="flow-row" style="justify-content:flex-start; flex-direction:column; align-items:flex-start; gap:6px;">
+          <div class="flow-node accent">core/config.py</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">.env → HIBP / IPInfo / NumVerify Keys</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">data/config.json → runtime prefs</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">Proxy · Timeout · Workers</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">database layer</div>
+        <div class="flow-row" style="justify-content:flex-start; flex-direction:column; align-items:flex-start; gap:6px;">
+          <div class="flow-node blue">core/database.py → SQLite</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">Table: scans (all results)</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">Table: cache (TTL 24h)</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">Auto-index · Row factory</div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">async runtime</div>
+        <div class="flow-row" style="justify-content:flex-start; flex-direction:column; align-items:flex-start; gap:6px;">
+          <div class="flow-node purple">asyncio + aiohttp</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">Semaphore: 20 workers</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">TCPConnector SSL bypass</div>
+          <div class="flow-node" style="font-size:10px; color:var(--muted)">Configurable timeout</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONNECTOR ═══ -->
+  <div class="connector-line"></div>
+
+  <!-- ═══ OSINT MODULES ═══ -->
+  <div class="card" style="--stripe:#aa00ff; --hover-border:#aa00ff; --hover-glow: 0 0 24px #aa00ff22;">
+    <div class="card-title" style="color:#aa00ff">🔍 OSINT INTELLIGENCE MODULES</div>
+    <div class="module-grid">
+      <div class="module-card" style="--m-color:#00aaff">
+        <div class="module-icon">📧</div>
+        <div class="module-name" style="color:#00aaff">Email Probe</div>
+        <div class="module-count" style="--m-color:#00aaff">120+ sites</div>
+        <div class="module-tags">
+          <span class="module-tag">async aiohttp</span>
+          <span class="module-tag">registration check</span>
+          <span class="module-tag">recovery check</span>
+          <span class="module-tag">JSON / body</span>
+          <span class="module-tag">regex match</span>
+        </div>
+      </div>
+      <div class="module-card" style="--m-color:#ff9f00">
+        <div class="module-icon">👤</div>
+        <div class="module-name" style="color:#ff9f00">Username Probe</div>
+        <div class="module-count" style="--m-color:#ff9f00">100+ sites</div>
+        <div class="module-tags">
+          <span class="module-tag">status code</span>
+          <span class="module-tag">body contains</span>
+          <span class="module-tag">body not-contains</span>
+          <span class="module-tag">profile URL</span>
+        </div>
+      </div>
+      <div class="module-card" style="--m-color:#ff00aa">
+        <div class="module-icon">📱</div>
+        <div class="module-name" style="color:#ff00aa">Phone Intel</div>
+        <div class="module-count" style="--m-color:#ff00aa">E.164</div>
+        <div class="module-tags">
+          <span class="module-tag">carrier detect</span>
+          <span class="module-tag">country code</span>
+          <span class="module-tag">line type</span>
+          <span class="module-tag">NumVerify API</span>
+        </div>
+      </div>
+      <div class="module-card" style="--m-color:#aa00ff">
+        <div class="module-icon">🌐</div>
+        <div class="module-name" style="color:#aa00ff">IP / Domain</div>
+        <div class="module-count" style="--m-color:#aa00ff">5 APIs</div>
+        <div class="module-tags">
+          <span class="module-tag">GeoIP</span>
+          <span class="module-tag">RDAP / WHOIS</span>
+          <span class="module-tag">DNS Records</span>
+          <span class="module-tag">Shodan free</span>
+          <span class="module-tag">AbuseIPDB</span>
+        </div>
+      </div>
+      <div class="module-card" style="--m-color:#ff3333">
+        <div class="module-icon">🔓</div>
+        <div class="module-name" style="color:#ff3333">Breach Inspector</div>
+        <div class="module-count" style="--m-color:#ff3333">HIBP v3</div>
+        <div class="module-tags">
+          <span class="module-tag">HIBP breaches</span>
+          <span class="module-tag">pastes</span>
+          <span class="module-tag">pwned passwords</span>
+          <span class="module-tag">k-anonymity</span>
+        </div>
+      </div>
+      <div class="module-card" style="--m-color:#00ffff">
+        <div class="module-icon">🕸️</div>
+        <div class="module-name" style="color:#00ffff">Social Profiler</div>
+        <div class="module-count" style="--m-color:#00ffff">API-based</div>
+        <div class="module-tags">
+          <span class="module-tag">GitHub API</span>
+          <span class="module-tag">Reddit API</span>
+          <span class="module-tag">Keybase</span>
+          <span class="module-tag">Gravatar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONNECTOR ═══ -->
+  <div class="connector-line"></div>
+
+  <!-- ═══ DATA SOURCES ═══ -->
+  <div class="card" style="--stripe:#ff9f00; --hover-border:#ff9f00; --hover-glow:0 0 24px #ff9f0022;">
+    <div class="card-title" style="color:#ff9f00">🗄️ DATA SOURCES &amp; PLATFORM COVERAGE</div>
+    <div class="sources-container">
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#00aaff; color:#00aaff">SOCIAL MEDIA</div>
+        <div class="sources-pills">
+          <span class="pill">Twitter/X</span><span class="pill">Instagram</span><span class="pill">Facebook</span>
+          <span class="pill">LinkedIn</span><span class="pill">TikTok</span><span class="pill">Snapchat</span>
+          <span class="pill">Discord</span><span class="pill">Pinterest</span><span class="pill">Tumblr</span>
+          <span class="pill">Reddit</span><span class="pill">Mastodon</span><span class="pill">Telegram</span>
+          <span class="pill">Weibo</span><span class="pill">Flickr</span><span class="pill">Behance</span>
+          <span class="pill">DeviantArt</span><span class="pill">Dribbble</span><span class="pill">Medium</span>
+          <span class="pill">Imgur</span><span class="pill">Wattpad</span>
+        </div>
+      </div>
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#00ff9f; color:#00ff9f">TECH &amp; DEV</div>
+        <div class="sources-pills">
+          <span class="pill">GitHub</span><span class="pill">GitLab</span><span class="pill">Bitbucket</span>
+          <span class="pill">Stack Overflow</span><span class="pill">Replit</span><span class="pill">CodePen</span>
+          <span class="pill">Dev.to</span><span class="pill">Hashnode</span><span class="pill">LeetCode</span>
+          <span class="pill">HackerRank</span><span class="pill">Codeforces</span><span class="pill">npm</span>
+          <span class="pill">PyPI</span><span class="pill">Figma</span><span class="pill">Canva</span>
+          <span class="pill">Notion</span><span class="pill">Slack</span><span class="pill">Zoom</span>
+          <span class="pill">Adobe</span><span class="pill">Dropbox</span><span class="pill">DigitalOcean</span>
+        </div>
+      </div>
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#ff3333; color:#ff3333">FINANCE &amp; CRYPTO</div>
+        <div class="sources-pills">
+          <span class="pill">PayPal</span><span class="pill">Venmo</span><span class="pill">Cash App</span>
+          <span class="pill">Coinbase</span><span class="pill">Binance</span><span class="pill">Kraken</span>
+          <span class="pill">eBay</span><span class="pill">Shopify</span>
+        </div>
+      </div>
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#aa00ff; color:#aa00ff">GAMING</div>
+        <div class="sources-pills">
+          <span class="pill">Steam</span><span class="pill">Epic Games</span><span class="pill">Blizzard</span>
+          <span class="pill">EA/Origin</span><span class="pill">Roblox</span><span class="pill">Chess.com</span>
+          <span class="pill">Lichess</span><span class="pill">itch.io</span><span class="pill">Speedrun</span>
+        </div>
+      </div>
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#ff00aa; color:#ff00aa">DATING</div>
+        <div class="sources-pills">
+          <span class="pill">Tinder</span><span class="pill">Bumble</span><span class="pill">OkCupid</span>
+          <span class="pill">Badoo</span><span class="pill">Hinge</span>
+        </div>
+      </div>
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#ff5500; color:#ff5500">STREAMING</div>
+        <div class="sources-pills">
+          <span class="pill">Spotify</span><span class="pill">Netflix</span><span class="pill">Twitch</span>
+          <span class="pill">Disney+</span><span class="pill">Hulu</span><span class="pill">SoundCloud</span>
+          <span class="pill">Vimeo</span><span class="pill">YouTube</span><span class="pill">Crunchyroll</span>
+          <span class="pill">Last.fm</span><span class="pill">Bandcamp</span><span class="pill">Dailymotion</span>
+        </div>
+      </div>
+      <div class="sources-category">
+        <div class="sources-category-title" style="border-color:#ffff00; color:#ffff00">REGIONAL (ID/SEA)</div>
+        <div class="sources-pills">
+          <span class="pill">Tokopedia</span><span class="pill">Bukalapak</span><span class="pill">Shopee</span>
+          <span class="pill">Gojek</span><span class="pill">Grab</span><span class="pill">Lazada</span>
+          <span class="pill">LINE</span><span class="pill">Viber</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONNECTOR ═══ -->
+  <div class="connector-line"></div>
+
+  <!-- ═══ TECH STACK + OUTPUT ═══ -->
+  <div class="two-col">
+
+    <div class="card" style="--stripe:#00ffff; --hover-border:#00ffff; --hover-glow:0 0 24px #00ffff22;">
+      <div class="card-title" style="color:#00ffff">🛠️ TECH STACK</div>
+      <div class="tech-grid">
+        <div class="tech-item"><div class="tech-dot" style="background:#00ff9f"></div>Python 3.9+</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#00aaff"></div>aiohttp</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#00aaff"></div>asyncio</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#00aaff"></div>requests</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#ff9f00"></div>Rich</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#ff9f00"></div>questionary</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#ff9f00"></div>pyfiglet</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#aa00ff"></div>Flask</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#ff00aa"></div>python-telegram-bot</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#00ffff"></div>SQLite</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#555577"></div>python-dotenv</div>
+        <div class="tech-item"><div class="tech-dot" style="background:#ffff00"></div>hashlib</div>
+      </div>
+    </div>
+
+    <div class="card" style="--stripe:#ff9f00; --hover-border:#ff9f00; --hover-glow:0 0 24px #ff9f0022;">
+      <div class="card-title" style="color:#ff9f00">📤 OUTPUT &amp; EXPORTS</div>
+      <div class="output-grid">
+        <div class="output-item">
+          <div class="output-fmt">🖥️</div>
+          <div class="output-name">Terminal</div>
+          <div class="output-desc">Rich tables · live progress · color-coded results</div>
+        </div>
+        <div class="output-item">
+          <div class="output-fmt">🌐</div>
+          <div class="output-name">HTML Report</div>
+          <div class="output-desc">Dark theme · sortable · shareable report file</div>
+        </div>
+        <div class="output-item">
+          <div class="output-fmt">📋</div>
+          <div class="output-name">JSON Export</div>
+          <div class="output-desc">Full structured data · API-ready · all fields</div>
+        </div>
+        <div class="output-item">
+          <div class="output-fmt">📊</div>
+          <div class="output-name">CSV Export</div>
+          <div class="output-desc">Spreadsheet-compatible · filter & analyze</div>
+        </div>
+        <div class="output-item">
+          <div class="output-fmt">💾</div>
+          <div class="output-name">SQLite Cache</div>
+          <div class="output-desc">24h TTL · avoid re-scanning · history</div>
+        </div>
+        <div class="output-item">
+          <div class="output-fmt">📱</div>
+          <div class="output-name">Telegram Msg</div>
+          <div class="output-desc">Formatted results · inline links · bot reply</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ DATA FLOW ═══ -->
+  <div class="card" style="--stripe:#555577;">
+    <div class="card-title" style="color:#888899">⚡ SCAN DATA FLOW</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div class="flow-row">
+        <div class="flow-node accent">User Input</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node blue">Validation</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Cache Check (SQLite)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node accent">Cache HIT → return instantly</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-node" style="color:var(--muted)">Cache MISS</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node blue">asyncio.gather() all tasks</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Semaphore (20 workers)</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node purple">aiohttp parallel requests</div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-node purple">Response parsing</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">status / body / JSON check</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node blue">Aggregate results</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node accent">Save to DB + display</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DEPLOYMENT ═══ -->
+  <div class="card" style="--stripe:#ffff00; --hover-border:#ffff00;">
+    <div class="card-title" style="color:#ffff00">📦 DEPLOYMENT — 4-STEP TERMUX INSTALL</div>
+    <div class="four-col" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+      <div style="background:var(--surface); border:1px solid var(--dim); border-radius:8px; padding:14px;">
+        <div style="color:#ffff00; font-size:20px; margin-bottom:6px;">①</div>
+        <div style="font-size:11px; color:#888; margin-bottom:4px;">CLONE</div>
+        <div style="font-size:11px; color:#00ff9f; font-family:monospace;">git clone https://github.com/</div>
+        <div style="font-size:10px; color:#555; margin-top:4px;">~15 sec</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--dim); border-radius:8px; padding:14px;">
+        <div style="color:#ffff00; font-size:20px; margin-bottom:6px;">②</div>
+        <div style="font-size:11px; color:#888; margin-bottom:4px;">INSTALL</div>
+        <div style="font-size:11px; color:#00ff9f; font-family:monospace;">bash install.sh</div>
+        <div style="font-size:10px; color:#555; margin-top:4px;">auto pip install</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--dim); border-radius:8px; padding:14px;">
+        <div style="color:#ffff00; font-size:20px; margin-bottom:6px;">③</div>
+        <div style="font-size:11px; color:#888; margin-bottom:4px;">CONFIGURE</div>
+        <div style="font-size:11px; color:#00ff9f; font-family:monospace;">nano .env</div>
+        <div style="font-size:10px; color:#555; margin-top:4px;">add API keys (optional)</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--dim); border-radius:8px; padding:14px;">
+        <div style="color:#ffff00; font-size:20px; margin-bottom:6px;">④</div>
+        <div style="font-size:11px; color:#888; margin-bottom:4px;">RUN</div>
+        <div style="font-size:11px; color:#00ff9f; font-family:monospace;">python sentinel.py</div>
+        <div style="font-size:10px; color:#555; margin-top:4px;">ready in seconds</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.arch-grid -->
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<div class="footer">
+  <div><span class="accent">⚡ SENTINEL OSINT v2.0.0</span> — Advanced Open-Source Intelligence Framework</div>
+  <div style="margin-top:6px; font-size:10px;">Python · asyncio · aiohttp · Rich · Flask · SQLite · Termux-Ready</div>
+  <div style="margin-top:6px; font-size:10px; color:#333355;">For authorized intelligence gathering and security research only</div>
+</div>
+
+</body>
+</html>
