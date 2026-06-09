@@ -1,7 +1,8 @@
  #  💠SENTINEL OSINT
 
-> **Advanced Open-Source Intelligence Framework**  
+> **Advanced Open-Source Intelligence Framework** 
 > Email · Username · Phone · IP/Domain · Breach · Social
+> developer:by Feri👾
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
