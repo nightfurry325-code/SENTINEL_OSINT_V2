@@ -1,30 +1,67 @@
-```mermaid
-graph TD
-    A([Mulai Tool OSINT]) --> B[Input Nomor Telepon]
-    B --> C{Validasi Format Nomor}
-    
-    C -- Tidak Valid --> D[Tampilkan Pesan Error]
-    D --> B
-    
-    C -- Valid --> E[Proses Scanning & Ekstraksi Data]
-    
-    E --> F[Cek Informasi Carrier / Provider]
-    E --> G[Cek Kode Negara & Lokasi Wilayah]
-    E --> H[Analisis Jejak Digital / OSINT Leak]
-    
-    F --> I[Gabungkan Semua Hasil Analisis]
-    G --> I
-    H --> I
-    
-    I --> J[Tampilkan Laporan Hasil Analisis di Terminal]
-    J --> K([Selesai])
-    
-    style A fill:#1f2328,stroke:#30363d,stroke-width:2px,color:#fff
-    style K fill:#1f2328,stroke:#30363d,stroke-width:2px,color:#fff
-    style E fill:#238636,stroke:#2ea043,stroke-width:1px,color:#fff
-    style C fill:#9e6a03,stroke:#d4bbff,stroke-width:1px,color:#fff
+flowchart TD
 
-# ⚡ SENTINEL OSINT
+    START([🚀 START OSINT ANALYSIS])
+
+    INPUT[/📱 Input Phone Number/]
+
+    VALIDATE{📋 Number Format Valid?}
+
+    ERROR[❌ Invalid Number<br/>Please Enter Valid Format]
+
+    SCAN[🔍 Intelligence Gathering Engine]
+
+    subgraph CORE["🧠 OSINT ANALYSIS MODULES"]
+        CARRIER[📡 Carrier Detection]
+        GEO[🌍 Country & Region Lookup]
+        LEAK[🕵️ Breach & Leak Intelligence]
+        META[📑 Metadata Extraction]
+    end
+
+    MERGE[⚙️ Correlation & Data Aggregation]
+
+    REPORT[📊 Generate Intelligence Report]
+
+    DISPLAY[/🖥️ Display Results in Terminal/]
+
+    END([✅ ANALYSIS COMPLETE])
+
+    START --> INPUT
+    INPUT --> VALIDATE
+
+    VALIDATE -- No --> ERROR
+    ERROR --> INPUT
+
+    VALIDATE -- Yes --> SCAN
+
+    SCAN --> CARRIER
+    SCAN --> GEO
+    SCAN --> LEAK
+    SCAN --> META
+
+    CARRIER --> MERGE
+    GEO --> MERGE
+    LEAK --> MERGE
+    META --> MERGE
+
+    MERGE --> REPORT
+    REPORT --> DISPLAY
+    DISPLAY --> END
+
+    %% Theme Styling
+
+    classDef startEnd fill:#0d1117,stroke:#58a6ff,color:#ffffff,stroke-width:3px;
+    classDef process fill:#161b22,stroke:#30363d,color:#ffffff,stroke-width:2px;
+    classDef decision fill:#5a3e00,stroke:#d29922,color:#ffffff,stroke-width:2px;
+    classDef module fill:#238636,stroke:#2ea043,color:#ffffff,stroke-width:2px;
+    classDef report fill:#1f6feb,stroke:#58a6ff,color:#ffffff,stroke-width:2px;
+
+    class START,END startEnd;
+    class SCAN,MERGE process;
+    class VALIDATE decision;
+    class CARRIER,GEO,LEAK,META module;
+    class REPORT,DISPLAY report;
+    
+#  💠SENTINEL OSINT
 
 > **Advanced Open-Source Intelligence Framework**  
 > Email · Username · Phone · IP/Domain · Breach · Social
