@@ -3,7 +3,7 @@
 > **Advanced Open-Source Intelligence Framework** 
 > Email · Username · Phone · IP/Domain · Breach · Social
 
-**Developer:** *by Feri 👾*
+**Developer:** *FERI 👾*
 
 ---
 
@@ -14,11 +14,6 @@
 [![Termux](https://img.shields.io/badge/Termux-Compatible-purple?style=flat-square)]()
 
 ---
-
-style A fill:#0d1117,stroke:#00ff9f,stroke-width:2px,color:#00ff9f
-    style R fill:#0d1117,stroke:#ffaa00,stroke-width:2px,color:#ffaa00
-    style E fill:#002b36,stroke:#00ff9f,stroke-width:1px,color:#00ff9f
-    style C
 
 ## 📋 Summary
 
