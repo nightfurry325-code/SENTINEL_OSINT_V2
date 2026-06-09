@@ -1,3 +1,29 @@
+```mermaid
+graph TD
+    A([Mulai Tool OSINT]) --> B[Input Nomor Telepon]
+    B --> C{Validasi Format Nomor}
+    
+    C -- Tidak Valid --> D[Tampilkan Pesan Error]
+    D --> B
+    
+    C -- Valid --> E[Proses Scanning & Ekstraksi Data]
+    
+    E --> F[Cek Informasi Carrier / Provider]
+    E --> G[Cek Kode Negara & Lokasi Wilayah]
+    E --> H[Analisis Jejak Digital / OSINT Leak]
+    
+    F --> I[Gabungkan Semua Hasil Analisis]
+    G --> I
+    H --> I
+    
+    I --> J[Tampilkan Laporan Hasil Analisis di Terminal]
+    J --> K([Selesai])
+    
+    style A fill:#1f2328,stroke:#30363d,stroke-width:2px,color:#fff
+    style K fill:#1f2328,stroke:#30363d,stroke-width:2px,color:#fff
+    style E fill:#238636,stroke:#2ea043,stroke-width:1px,color:#fff
+    style C fill:#9e6a03,stroke:#d4bbff,stroke-width:1px,color:#fff
+
 # ⚡ SENTINEL OSINT
 
 > **Advanced Open-Source Intelligence Framework**  
