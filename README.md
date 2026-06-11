@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" width="100%">
+</p>
+
 ### OSINT INTELLIGENCE FRAMEWORK
 
 **Email · Username · Phone · IP/Domain · Breach · Social**
