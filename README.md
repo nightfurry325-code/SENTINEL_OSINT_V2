@@ -1,5 +1,9 @@
-### OSINT INTELLIGENCE FRAMEWORK
-sentinel.png
+## OSINT INTELLIGENCE FRAMEWORK
+
+![sentinel.png](sentinel.png)
+
+###
+
 **Email · Username · Phone · IP/Domain · Breach · Social**
 
 ---
